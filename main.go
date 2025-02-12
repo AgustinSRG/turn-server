@@ -77,8 +77,11 @@ func main() {
 	// Create auth manager
 
 	authManager := NewAuthManager(logger.CreateChildLogger("[AUTH] "), AuthConfig{
-		Realm: realm,
-		Users: genv.GetEnvString("USERS", ""),
+		Realm:                     realm,
+		Users:                     genv.GetEnvString("USERS", ""),
+		AuthSecret:                genv.GetEnvString("AUTH_SECRET", ""),
+		AuthCallbackUrl:           genv.GetEnvString("AUTH_CALLBACK_URL", ""),
+		AuthCallbackAuthorization: genv.GetEnvString("AUTH_CALLBACK_AUTHORIZATION", ""),
 	})
 
 	// Create relay address generator

@@ -74,9 +74,12 @@ Note: The ports must be opened through the firewall under the UDP protocol.
 
 ### Authentication
 
-| Variable | Description                                                                                                    |
-| -------- | -------------------------------------------------------------------------------------------------------------- |
-| `USERS`  | List of users and passwords separated by commas. The user and the password must be separated by a colon (`:`). |
+| Variable                      | Description                                                                                                                                            |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `USERS`                       | List of users and passwords separated by commas. The user and the password must be separated by a colon (`:`).                                         |
+| `AUTH_SECRET`                 | Secret to validate authentication tokens. Leave empty to disable auth tokens. Check the [authentication tokens documentation](#authentication-tokens). |
+| `AUTH_CALLBACK_URL`           | URL of the authorization callback. Leave empty to disable it. Check the [authentication callback documentation](#authentication-callback)              |
+| `AUTH_CALLBACK_AUTHORIZATION` | Value for the `Authorization` header when calling the authorization callback.                                                                          |
 
 ### UDP Listener
 
@@ -115,12 +118,66 @@ Note: The ports must be opened through the firewall under the UDP protocol.
 | `LOG_DEBUG`   | Can be `YES` or `NO`. Default: `NO`. Set it to `YES` in order to enable logging `DEBUG` messages    |
 | `LOG_TRACE`   | Can be `YES` or `NO`. Default: `NO`. Set it to `YES` in order to enable logging `TRACE` messages    |
 
-## Using the TURN server
+## Documentation
 
-Assuming you set an user with name `user` and password `password`, you can user the server by setting the URL, username and credential in the `iceServers` section of the `RTCPeerConnection` constructor options.
+### Authentication tokens
+
+In order to control the TURN server authentication with dynamic users, the following authentication token system is available:
+
+- The `username` must follow the pattern: `turn/{TIMESTAMP}/{EXPIRATION}/{UID}`. The `TIMESTAMP` must be the token generation timestamp, in **UNIX time (Seconds)**. The `EXPIRATION` must be the expiration timestamp, also in **UNIX time (Seconds)**. The `UID` can be any string. It will be sent to the callback if configured.
+- The `password` must be the **SHA-256** (SHA-2) of the UTF-8 bytes of the concatenation of the `username` and the `secret` (value of `AUTH_SECRET`), converted into **hexadecimal** and **lowercased**.
+
+The application using the TURN server can generate these tokens as credentials for their users, controlling the duration of such credentials.
+
+Here is an example in Go of the procedure of generation of the password:
+
+```go
+import (
+  "crypto/sha256"
+  "encoding/hex"
+  "strings"
+)
+
+// Generates an authentication token, to be used
+// as the password for the given username
+//
+// Parameters:
+//   - username - The username
+//   - secret - The secret shared between the TURN server and the application server
+//
+// Returns the password as string
+func GenerateAuthPassword(username string, secret string) string {
+	h := sha256.New()
+
+	h.Write([]byte(username))
+	h.Write([]byte(secret))
+
+	return strings.ToLower(hex.EncodeToString(h.Sum(nil)))
+}
+```
+
+### Authentication callback
+
+In order for your application to get a more fine-grained control of authentication, you can configure and URL for the TURN server in order to check for access.
+
+Note: Authentication tokens must be used in order to also use the callback.
+
+The procedure is the following:
+
+- Every time the TURN server receives an authentication request, it will send a `GET` request to the URL provided by `AUTH_CALLBACK_URL`.
+- To the URL, the following **query parameters** will be added:
+  - `uid` = The `UID` part of the `username`
+  - `ip` = The client IP address
+- The value of `AUTH_CALLBACK_AUTHORIZATION` will be sent as the `Authorization` header, in order for the application to restrict access to the callback, so only the TURN server can use it.
+- If the request to the callback returns an status code different from `200`, the authentication request is considered as failed, and the user will be denied of access to the TURN server.
+- If the request to the callback returns an status code of `200`, the authentication process wil continue, using a generated password as described in the [authentication tokens](#authentication-tokens) section.
+
+### Using the TURN server
+
+In order to use the TURN server in the browser, you can user the server by setting the URL, username and credential in the `iceServers` section of the `RTCPeerConnection` constructor options.
 
 ```js
-const TURN_SERVER_HOST = "localhost"
+const TURN_SERVER_HOST = "localhost";
 
 const iceConfiguration = {
   iceServers: [
