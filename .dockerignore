@@ -1,0 +1,13 @@
+# Ignore binaries
+
+turn-server
+turn-server.exe
+
+# Ignore temp files
+
+temp
+
+# Ignore .env
+
+.env
+*.log
