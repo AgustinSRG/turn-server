@@ -170,11 +170,11 @@ The procedure is the following:
   - `ip` = The client IP address
 - The value of `AUTH_CALLBACK_AUTHORIZATION` will be sent as the `Authorization` header, in order for the application to restrict access to the callback, so only the TURN server can use it.
 - If the request to the callback returns an status code different from `200`, the authentication request is considered as failed, and the user will be denied of access to the TURN server.
-- If the request to the callback returns an status code of `200`, the authentication process wil continue, using a generated password as described in the [authentication tokens](#authentication-tokens) section.
+- If the request to the callback returns an status code of `200`, the authentication process will continue, using a generated password as described in the [authentication tokens](#authentication-tokens) section.
 
 ### Using the TURN server
 
-In order to use the TURN server in the browser, you can user the server by setting the URL, username and credential in the `iceServers` section of the `RTCPeerConnection` constructor options.
+In order to use the TURN server in the browser, you can use the server by setting the URL, username and credential in the `iceServers` section of the `RTCPeerConnection` constructor options.
 
 ```js
 const TURN_SERVER_HOST = "localhost";
