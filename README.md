@@ -22,7 +22,7 @@ The build command will create a binary in the current directory, called `turn-se
 
 ## Docker
 
-You can find the docker image for this project available in Docker Hub: https://hub.docker.com/r/asanrom/hls-websocket-cdn
+You can find the docker image for this project available in Docker Hub: https://hub.docker.com/r/asanrom/turn-server
 
 To pull it type:
 
