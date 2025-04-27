@@ -1,6 +1,6 @@
 # TURN server
 
-This a TURN server for WebRTC applications, built using the [Pion TURN](https://github.com/pion/turn) toolkit.
+TURN server for WebRTC applications, built using the [Pion TURN](https://github.com/pion/turn) toolkit.
 
 ## Compilation
 
